@@ -1,0 +1,26 @@
+{
+    "Parameters" : {
+        "ServicePrincipalName":{
+            "Type": "string",
+            "DefaultValue": "ServicePrincipalA",
+            "Description" : "The name of the service principal"
+        },
+        "Password" : {
+            "Type": "string",
+            "DefaultValue" : "password",
+            "Description" : "The Password chosen for the service principal"
+        }
+    },
+    "Modules" : [
+        "Install-SitecoreExperienceCloud.psm1"
+    ],
+    "Tasks" : {
+        "Create a Service Principal" : {
+            "Type" : "NewServicePrincipal",
+            "Params" : {
+                "Password" : "[parameter('Password')]",
+                "ServicePrincipalName" : "[parameter('ServicePrincipalName')]"
+            }
+        }     
+    }
+}
