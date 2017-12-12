@@ -5,16 +5,19 @@ Function New-ServicePrincipal{
         [parameter(Mandatory=$true)]
         [string]$ServicePrincipalName
     )
-    Write-TaskHeader -TaskName "Azure Service Principal" -TaskType "New"
-    Import-Module AzureRM.Resources
 
-    Login-AzureRmAccount
-    $secpassword = ConvertTo-SecureString $Password -AsPlainText -Force
-    $servicePrincipal = New-AzureRmADServicePrincipal -DisplayName $ServicePrincipalName -Password $secpassword
-
-    Start-Sleep 20
+    process{
+        Write-TaskHeader -TaskName "Azure Service Principal" -TaskType "New"
+        Import-Module AzureRM.Resources
     
-    New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $servicePrincipal.ApplicationId
+        Login-AzureRmAccount
+        $secpassword = ConvertTo-SecureString $Password -AsPlainText -Force
+        $servicePrincipal = New-AzureRmADServicePrincipal -DisplayName $ServicePrincipalName -Password $secpassword
+    
+        Start-Sleep 20
+        
+        New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $servicePrincipal.ApplicationId
+    }  
 }
 
 Function Invoke-NewAzureRmStorageAccount {
@@ -28,14 +31,16 @@ Function Invoke-NewAzureRmStorageAccount {
         [string]$ResourceGroupName
     )
 
-    New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName `
-    -Name $StorageAccountName `
-    -Location $StorageAccountLocation `
-    -SkuName Standard_LRS `
-    -Kind Storage `
-    -EnableEncryptionService Blob
-
-    Start-Sleep 5
+    process{
+        New-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName `
+        -Name $StorageAccountName `
+        -Location $StorageAccountLocation `
+        -SkuName Standard_LRS `
+        -Kind Storage `
+        -EnableEncryptionService Blob
+    
+        Start-Sleep 5
+    } 
 }
 
 Function Invoke-NewAzureRmContainer {
@@ -49,9 +54,11 @@ Function Invoke-NewAzureRmContainer {
         [string]$ContainerName
     )
 
-    Set-AzureRmCurrentStorageAccount -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName
-
-    New-AzureStorageContainer -Name $ContainerName -Permission Container -Context $ctx
+    process{
+        Set-AzureRmCurrentStorageAccount -StorageAccountName $StorageAccountName -ResourceGroupName $ResourceGroupName
+        
+        New-AzureStorageContainer -Name $ContainerName -Permission Container -Context $ctx
+    }
 }
 
 Function New-AzureDeploymentParams {
@@ -73,16 +80,18 @@ Function Set-AzureLogin{
         [string]$ApplicationPassword
     )
 
-    Import-Module AzureRM.Resources
-    
-    if($UseServicePrincipal){
-        $securePassword = ConvertTo-SecureString $ApplicationPassword -AsPlainText -Force
-        $credentials = New-Object System.Management.Automation.PSCredential ($ApplicationId, $secpasswd)
-        Login-AzureRmAccount -ServicePrincipal -Tenant $TenantId -Credential $credentials
-    }
-    else{
-        Login-AzureRmAccount        
-    }
+    process {
+        Import-Module AzureRM.Resources
+        
+        if($UseServicePrincipal){
+            $securePassword = ConvertTo-SecureString $ApplicationPassword -AsPlainText -Force
+            $credentials = New-Object System.Management.Automation.PSCredential ($ApplicationId, $securePassword)
+            Login-AzureRmAccount -ServicePrincipal -Tenant $TenantId -Credential $credentials
+        }
+        else{
+            Login-AzureRmAccount        
+        }
+    }  
 }
 
 Function Set-AzureContext {
@@ -97,12 +106,14 @@ Function Set-AzureContext {
         [string]$TenantId
     )
    
-    if($UseServicePrincipal){
-        Set-AzureRmContext -SubscriptionId $SubscriptionId -TenantId $TenantId
-    }
-    else{
-        Set-AzureRmContext -SubscriptionId $SubscriptionId        
-    }
+    process{
+        if($UseServicePrincipal){
+            Set-AzureRmContext -SubscriptionId $SubscriptionId -TenantId $TenantId
+        }
+        else{
+            Set-AzureRmContext -SubscriptionId $SubscriptionId        
+        }
+    }  
 }
 
 Function Set-ResourceGroup {
@@ -115,14 +126,16 @@ Function Set-ResourceGroup {
         [string]$Location
     )
 
-    $ResourceGroupExists = Get-AzureRmResourceGroup -Name $ResourceGroupName -ev notPresent -ea 0
-	
-	if (!$ResourceGroupExists) 
-	{
-		New-AzureRmResourceGroup -Name $ResourceGroupName -Location $location
+    process {
+        $ResourceGroupExists = Get-AzureRmResourceGroup -Name $ResourceGroupName -ev notPresent -ea 0
+        
+        if (!$ResourceGroupExists) 
+        {
+            New-AzureRmResourceGroup -Name $ResourceGroupName -Location $location
+        }
+        
+        Write-Host $("Resource Group Set: $($ResourceGroupName)")
     }
-    
-    Write-Host $("Resource Group Set: $($ResourceGroupName)")
 }
 
 Function Remove-ResourceGroup {
@@ -134,18 +147,20 @@ Function Remove-ResourceGroup {
         [boolean]$Confirm
     )
 
-    $ResourceGroupExists = Get-AzureRmResourceGroup -Name $ResourceGroupName -ev notPresent -ea 0
-
-    if(!$ResourceGroupExists){
-        throw $("Resource Group $($ResourceGroupName) Not found")
-    }
-
-    if($Confirm){
-        Remove-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Confirm
-    }
-    else{
-        Remove-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName
-    }
+    process {
+        $ResourceGroupExists = Get-AzureRmResourceGroup -Name $ResourceGroupName -ev notPresent -ea 0
+        
+            if(!$ResourceGroupExists){
+                throw $("Resource Group $($ResourceGroupName) Not found")
+            }
+        
+            if($Confirm){
+                Remove-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Confirm
+            }
+            else{
+                Remove-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName
+            }
+    }   
 }
 
 Function Set-SitecoreParams {
@@ -164,18 +179,20 @@ Function Set-SitecoreParams {
         [string]$XcSingleMsDeployPackageUrl
     )
 
-    if(-not $global:SitecoreXPAzureParams)
-    {
-        $global:SitecoreXPAzureParams = @{}
+    process{
+        if(-not $global:SitecoreXPAzureParams)
+        {
+            $global:SitecoreXPAzureParams = @{}
+        }
+    
+        $global:SitecoreXPAzureParams.Add('sitecoreAdminPassword', $SitecoreAdminPassword)
+        $global:SitecoreXPAzureParams.Add('sqlServerLogin', $SqlUsername)
+        $global:SitecoreXPAzureParams.Add('sqlServerPassword', $SqlPassword)
+        $global:SitecoreXPAzureParams.Add('xcSingleMsDeployPackageUrl', $XcSingleMsDeployPackageUrl)
+        $global:SitecoreXPAzureParams.Add('singleMsDeployPackageUrl', $SingleMsDeployPackageUrl)
+        Write-Host "Sitecore Parameters Set"
+        $global:SitecoreXPAzureParams
     }
-
-    $global:SitecoreXPAzureParams.Add('sitecoreAdminPassword', $SitecoreAdminPassword)
-    $global:SitecoreXPAzureParams.Add('sqlServerLogin', $SqlUsername)
-    $global:SitecoreXPAzureParams.Add('sqlServerPassword', $SqlPassword)
-    $global:SitecoreXPAzureParams.Add('xcSingleMsDeployPackageUrl', $XcSingleMsDeployPackageUrl)
-    $global:SitecoreXPAzureParams.Add('singleMsDeployPackageUrl', $SingleMsDeployPackageUrl)
-    Write-Host "Sitecore Parameters Set"
-    $global:SitecoreXPAzureParams
 }
 
 Function Set-LicenseFile {
@@ -185,18 +202,20 @@ Function Set-LicenseFile {
         [parameter(Mandatory=$true)]
         [string]$FilePath
     )
-
-    if(-not $global:SitecoreXPAzureParams)
-    {
-        $global:SitecoreXPAzureParams = @{}
+    
+    process {
+        if(-not $global:SitecoreXPAzureParams)
+        {
+            $global:SitecoreXPAzureParams = @{}
+        }
+    
+        if(-not $global:SitecoreXPAzureParams.containsKey('licenseXml')){
+            $licenseFileBlob = Get-Content -Raw -Encoding UTF8 -Path $FilePath | Out-String
+            $global:SitecoreXPAzureParams.Add('licenseXml', $licenseFileBlob) 
+        }  
+        Write-Host "License File Set"
+        $global:SitecoreXPAzureParams
     }
-
-    if(-not $global:SitecoreXPAzureParams.containsKey('licenseXml')){
-        $licenseFileBlob = Get-Content -Raw -Encoding UTF8 -Path $FilePath | Out-String
-        $global:SitecoreXPAzureParams.Add('licenseXml', $licenseFileBlob) 
-    }  
-    Write-Host "License File Set"
-    $global:SitecoreXPAzureParams
 }
 
 Function Set-DeploymentId {
@@ -206,16 +225,19 @@ Function Set-DeploymentId {
         [parameter(Mandatory=$true)]
         [string]$DeploymentId
     )
-    if(-not $global:SitecoreXPAzureParams)
-    {
-        $global:SitecoreXPAzureParams = @{}
-    }
 
-    if(-not $global:SitecoreXPAzureParams.containsKey('deploymentId')){
-        $global:SitecoreXPAzureParams.Add('deploymentId', $DeploymentId)        
-    }
-    Write-Host "Deployment ID Set"
-    $global:SitecoreXPAzureParams
+    process {
+        if(-not $global:SitecoreXPAzureParams)
+        {
+            $global:SitecoreXPAzureParams = @{}
+        }
+    
+        if(-not $global:SitecoreXPAzureParams.containsKey('deploymentId')){
+            $global:SitecoreXPAzureParams.Add('deploymentId', $DeploymentId)        
+        }
+        Write-Host "Deployment ID Set"
+        $global:SitecoreXPAzureParams
+    }  
 }
 
 Function Set-AzureRegion {
@@ -225,14 +247,17 @@ Function Set-AzureRegion {
         [parameter(Mandatory=$true)]
         [string]$Location
     )
-    if(-not $global:SitecoreXPAzureParams)
-    {
-        $global:SitecoreXPAzureParams = @{}
-    }
 
-    $global:SitecoreXPAzureParams.Add('location', $Location)
-    Write-Host "Location Set"
-    $global:SitecoreXPAzureParams
+    process {
+        if(-not $global:SitecoreXPAzureParams)
+        {
+            $global:SitecoreXPAzureParams = @{}
+        }
+    
+        $global:SitecoreXPAzureParams.Add('location', $Location)
+        Write-Host "Location Set"
+        $global:SitecoreXPAzureParams
+    }  
 }
 
 Function Set-SslCert {
@@ -245,20 +270,23 @@ Function Set-SslCert {
         [string]$CertPass
     )
 
-    if(-not $global:SitecoreXPAzureParams)
-    {
-        $global:SitecoreXPAzureParams = @{}
+    process{
+        if(-not $global:SitecoreXPAzureParams)
+        {
+            $global:SitecoreXPAzureParams = @{}
+        }
+        if(-not $global:SitecoreXPAzureParams.containsKey('authCertificateBlob')){
+            $CertBlob = [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes($FilePath))
+            $global:SitecoreXPAzureParams.Add('authCertificateBlob', $CertBlob)
+        }
+        if(-not $global:SitecoreXPAzureParams.containsKey('authCertificateBlob')){
+            $global:SitecoreXPAzureParams.Add('authCertificatePassword', $CertPass)        
+        }
+    
+        Write-Host "SSL Certificate Set"
+        $global:SitecoreXPAzureParams
+    
     }
-    if(-not $global:SitecoreXPAzureParams.containsKey('authCertificateBlob')){
-        $CertBlob = [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes($FilePath))
-        $global:SitecoreXPAzureParams.Add('authCertificateBlob', $CertBlob)
-    }
-    if(-not $global:SitecoreXPAzureParams.containsKey('authCertificateBlob')){
-        $global:SitecoreXPAzureParams.Add('authCertificatePassword', $CertPass)        
-    }
-
-    Write-Host "SSL Certificate Set"
-    $global:SitecoreXPAzureParams
 }
 
 Function Get-UserConfirmation {
@@ -284,26 +312,14 @@ Function Invoke-NewAzureRmResourceGroupDeployment {
         [parameter(Mandatory=$true)]
         [string]$DeploymentName,
         [parameter(Mandatory=$true)]
-        [string]$TemplateUri,
-        [parameter(Mandatory=$true)]
-        [boolean]$Confirm
-    )
+        [string]$TemplateUri
+      )
 
-    Import-Module AzureRM.Resources
-    Set-ResourceGroup -ResourceGroupName $ResourceGroupName -Location $Location
-    Write-Host "Beginning Deployment of ARM template, this may take some time"
-
-    if($Confirm){
-        New-AzureRmResourceGroupDeployment -Name $DeploymentName `
-        -ResourceGroupName $ResourceGroupName `
-        -TemplateUri $TemplateUri `
-        -TemplateParameterObject $global:SitecoreXPAzureParams `
-        -Debug `
-        -DeploymentDebugLogLevel All `
-        -Verbose `
-        -Confirm
-    }
-    else{
+      process{
+        Import-Module AzureRM.Resources
+        Set-ResourceGroup -ResourceGroupName $ResourceGroupName -Location $Location
+        Write-Host "Beginning Deployment of ARM template, this may take some time"
+    
         New-AzureRmResourceGroupDeployment -Name $DeploymentName `
         -ResourceGroupName $ResourceGroupName `
         -TemplateUri $TemplateUri `
@@ -311,9 +327,9 @@ Function Invoke-NewAzureRmResourceGroupDeployment {
         -Debug `
         -DeploymentDebugLogLevel All `
         -Verbose
-    }
-  
-    Write-Host "Deployment Complete"
+      
+        Write-Host "Deployment Complete"
+      }  
 }
 
 Register-SitecoreInstallExtension -Command Remove-ResourceGroup -As RemoveResourceGroup -Type Task
