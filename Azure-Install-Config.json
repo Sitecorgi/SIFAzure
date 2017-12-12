@@ -62,7 +62,7 @@
         },
         "SslCertificateFilePath" : {
             "Type": "string",
-            "DefaultValue" : "C:\\Certs\\fullcertexport-nonprod.p12",
+            "DefaultValue" : "C:\\Certs\\Cert",
             "Description" : "The file path to the SSL Certificate"
         },
         "SslCertificatePassword" : {

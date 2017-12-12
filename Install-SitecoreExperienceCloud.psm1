@@ -137,8 +137,7 @@ Function Remove-ResourceGroup {
     $ResourceGroupExists = Get-AzureRmResourceGroup -Name $ResourceGroupName -ev notPresent -ea 0
 
     if(!$ResourceGroupExists){
-        Write-Host $("Resource Group $($ResourceGroupName) Not found")
-        return
+        throw $("Resource Group $($ResourceGroupName) Not found")
     }
 
     if($Confirm){
@@ -219,7 +218,7 @@ Function Set-DeploymentId {
     $global:SitecoreXPAzureParams
 }
 
-Function Set-Location {
+Function Set-AzureRegion {
     
     [Cmdletbinding(SupportsShouldProcess=$true)]
     param(
@@ -301,7 +300,7 @@ Function Invoke-NewAzureRmResourceGroupDeployment {
         -TemplateParameterObject $global:SitecoreXPAzureParams `
         -Debug `
         -DeploymentDebugLogLevel All `
-        -Verbose
+        -Verbose `
         -Confirm
     }
     else{
@@ -326,7 +325,7 @@ Register-SitecoreInstallExtension -Command Set-ResourceGroup -As SetResourceGrou
 Register-SitecoreInstallExtension -Command Set-LicenseFile -As SetLicenseFile -Type Task
 Register-SitecoreInstallExtension -Command Set-SslCert -As SetSslCert -Type Task
 Register-SitecoreInstallExtension -Command Set-SitecoreParams -As SetSitecoreParams -Type Task
-Register-SitecoreInstallExtension -Command Set-Location -As SetLocation -Type Task
+Register-SitecoreInstallExtension -Command Set-AzureRegion -As SetLocation -Type Task
 Register-SitecoreInstallExtension -Command Set-DeploymentId -As SetDeploymentId -Type Task
 Register-SitecoreInstallExtension -Command Get-UserConfirmation -As GetUserConfirmation -Type Task
 Register-SitecoreInstallExtension -Command Invoke-NewAzureRmResourceGroupDeployment -As InvokeNewAzureRmResourceGroupDeployment -Type Task
