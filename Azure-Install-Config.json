@@ -87,12 +87,12 @@
         },
         "SingleMsDeployPackageUrl": {
             "Type": "string",
-            "DefaultValue": "https://jdsitecorestorage.blob.core.windows.net/sitecorearchives/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_single.scwdp.zip",
+            "DefaultValue": "https://your-azure-storage/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_single.scwdp.zip",
             "Description" : "Url to the MS Deploy Package for Sitecore XP"
         },
         "XcSingleMsDeployPackageUrl": {
             "Type" : "string",
-            "DefaultValue": "https://jdsitecorestorage.blob.core.windows.net/sitecorearchives/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_xp0xconnect.scwdp.zip",
+            "DefaultValue": "https://your-azure-storage/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_xp0xconnect.scwdp.zip",
             "Description" : "Url to the MS Deploy Package for Sitecore XC"
         },
         "TemplateUri": {
