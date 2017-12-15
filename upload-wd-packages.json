@@ -1,0 +1,189 @@
+{
+    "Parameters" : {
+        "DeploymentId" : {
+            "Type" : "string",
+            "DefaultValue" : "my-sitecore-site",
+            "Description" : "The Deployment ID"
+        },
+        "UseServicePrincipal" : {
+            "Type": "Boolean",
+            "DefaultValue": true,
+            "Description": "Use a service principal to authenticate, or Live / AD login if not"
+        },  
+        "SubscriptionId" : {
+            "Type": "string",
+            "DefaultValue": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx",
+            "Description": "The Azure Subscription ID"
+        },
+        "TenantId" : {
+            "Type": "string",
+            "DefaultValue": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx",
+            "Description": "The Service Principal Tenant ID, if using"
+        },
+        "ApplicationId" : {
+            "Type": "string",
+            "DefaultValue": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx",
+            "Description": "The Service Principal Application ID, if using"
+        },
+        "ApplicationPassword" : {
+            "Type": "string",
+            "DefaultValue": "password",
+            "Description": "The Service Principal Application Password, if using"
+        },
+        "ResourceGroupName":{
+            "Type": "string",
+            "DefaultValue": "sitecore9resourcegroup",
+            "Description" : "The name of the resource group in which to provision Sitecore"
+        },
+        "Location" : {
+            "Type": "string",
+            "DefaultValue" : "West Europe",
+            "Description" : "The Azure region in which to deploy"
+        },
+        "StorageAccountLocation" : {
+            "Type" : "string",
+            "DefaultValue" : "West Europe",
+            "Description" : "The Azure region in which to create the storage account"
+        },
+        "StorageAccountName" : {
+            "Type" : "string",
+            "DefaultValue" : "sitecore9storageaccount",
+            "Description" : "The storage account name. Must be between 3 and 24 characters in length and use numbers and lower-case letters only"
+        },
+        "ContainerName" : {
+            "Type" : "string",
+            "DefaultValue" : "sitecorewebdeploypackages",
+            "Description" :  "The Name of the Azure Container for storing web deploy packages"
+        },
+        "LicenseFilePath" : {
+            "Type": "string",
+            "DefaultValue" : "C:\\Sitecore\\Licenses\\License.xml",
+            "Description" : "The file path to the Sitecore License"
+        },
+        "SslCertificateFilePath" : {
+            "Type": "string",
+            "DefaultValue" : "C:\\Certs\\my-ssl-cert.p12",
+            "Description" : "The file path to the SSL Certificate"
+        },
+        "SslCertificatePassword" : {
+            "Type" : "string",
+            "DefaultValue" : "password",
+            "Description" : "The SSL Certificate's Password"
+        },
+        "SitecoreAdminPassword" : {
+            "Type" : "string",
+            "DefaultValue" : "password",
+            "Description" : "The Sitecore Admin Password"
+        },
+        "SqlServerUsername" : {
+            "Type" : "string",
+            "DefaultValue" : "sitecoreuser",
+            "Description" : "The SQL server user name"
+        },
+        "SqlServerPassword" : {
+            "Type" : "string",
+            "DefaultValue" : "password",
+            "Description" : "The SQL Server Password"
+        },
+        "XCPackageLocation" : {
+            "Type" : "string",
+            "DefaultValue" : "C:\\Sitecore\\Archives\\Azure\\Sitecore 9.0.0 rev. 171002 (WDP XPSingle packages)\\Sitecore 9.0.0 rev. 171002 (Cloud)_xp0xconnect.scwdp.zip",
+            "Description" : "The file path to the XConnect Web Deploy Package"
+        },
+        "SitecorePackageLocation" : {
+            "Type" : "string",
+            "DefaultValue" : "C:\\Sitecore\\Archives\\Azure\\Sitecore 9.0.0 rev. 171002 (WDP XPSingle packages)\\Sitecore 9.0.0 rev. 171002 (Cloud)_single.scwdp.zip",
+            "Description" : "The file path to the Sitecore Web Deploy Package"
+        },
+        "XCBlobName" : {
+            "Type" : "string",
+            "DefaultValue" : "Sitecore 9.0.0 rev. 171002 (Cloud)_xp0xconnect.scwdp.zip",
+            "Description" : "The Blob name for the XConnect Web Deploy Package"
+        },
+        "SitecoreBlobName" : {
+            "Type" : "string",
+            "DefaultValue" : "Sitecore 9.0.0 rev. 171002 (Cloud)_single.scwdp.zip",
+            "Description" : "The Blob name for the Sitecore Web Deploy Package"
+        },
+        "TemplateUri": {
+            "Type" : "string",
+            "DefaultValue": "https://raw.githubusercontent.com/Sitecore/Sitecore-Azure-Quickstart-Templates/master/Sitecore%209.0.0/XPSingle/azuredeploy.json",
+            "Description" : "Url to the ARM template used to deploy"
+        }
+    },
+    "Variables" : {
+        "MsDeployPackageUrl" : "[concat('https://', parameter('StorageAccountName'), '.blob.core.windows.net/', parameter('ContainerName'), '/', parameter('SitecoreBlobName'))]",
+        "XCMsDeployPackageUrl" : "[concat('https://', parameter('StorageAccountName'), '.blob.core.windows.net/', parameter('ContainerName'), '/', parameter('XCBlobName'))]"        
+    },
+    "Modules" : [
+        "Install-SitecoreExperienceCloud.psm1"
+    ],
+    "Tasks" : {
+        "Login to Azure" : {
+            "Type" : "SetAzureLogin",
+            "Params" : {
+                "UseServicePrincipal" : "[parameter('UseServicePrincipal')]",
+                "TenantId" : "[parameter('TenantId')]",
+                "ApplicationId" : "[parameter('ApplicationId')]",
+                "ApplicationPassword" : "[parameter('ApplicationPassword')]"
+            }
+        },
+        "Set Azure RM Context" : {
+            "Type" : "SetAzureContext",
+            "Description" : "Sets the Azure Rm Context",
+            "Params" : {
+                "SubscriptionId" : "[parameter('SubscriptionId')]",
+                "UseServicePrincipal" : "[parameter('UseServicePrincipal')]",
+                "TenantId" : "[parameter('TenantId')]"
+            }
+        },
+        "Set New Resource Group" : {
+            "Type" : "SetResourceGroup",
+            "Description" : "Sets the resource group",
+            "Params" : {
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "Location" : "[parameter('Location')]"
+            }
+        },
+        "Create New Storage Account" : {
+            "Type" : "NewAzureRmStorageAccount",
+            "Description" : "Creates a new storage account in the specified resource group",
+            "Params" : {
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "StorageAccountName" : "[parameter('StorageAccountName')]",
+                "StorageAccountLocation" : "[parameter('StorageAccountLocation')]"
+            }
+        },
+        "Create New Container for Blob Storage" : {
+            "Type" : "NewAzureRmContainer",
+            "Description" : "Creates a new container for blob storage in the specified storage account",
+            "Params" : {
+                "StorageAccountName" : "[parameter('StorageAccountName')]",
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "ContainerName" : "[parameter('ContainerName')]"
+            }
+        },
+        "Upload XC Media to Container" : {
+            "Type" : "UploadMediaToContainer",
+            "Description" : "Upload Web Deploy packages to the specified container",
+            "Params" : {
+                "StorageAccountName" : "[parameter('StorageAccountName')]",
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "ContainerName" : "[parameter('ContainerName')]",
+                "PackageLocation" : "[parameter('XCPackageLocation')]",
+                "BlobName" : "[parameter('XCBlobName')]"
+            }
+        },
+        "Upload Sitecore Media to Container" : {
+            "Type" : "UploadMediaToContainer",
+            "Description" : "Upload Web Deploy packages to the specified container",
+            "Params" : {
+                "StorageAccountName" : "[parameter('StorageAccountName')]",
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "ContainerName" : "[parameter('ContainerName')]",
+                "PackageLocation" : "[parameter('SitecorePackageLocation')]",
+                "BlobName" : "[parameter('SitecoreBlobName')]"
+            }
+        }
+    }
+}

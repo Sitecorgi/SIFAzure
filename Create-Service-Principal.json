@@ -2,7 +2,7 @@
     "Parameters" : {
         "ServicePrincipalName":{
             "Type": "string",
-            "DefaultValue": "ServicePrincipalA",
+            "DefaultValue": "my-service-principal",
             "Description" : "The name of the service principal"
         },
         "Password" : {

@@ -7,7 +7,7 @@
         },
         "UseServicePrincipal" : {
             "Type": "Boolean",
-            "DefaultValue": false,
+            "DefaultValue": true,
             "Description": "Use a service principal to authenticate, or Live / AD login if not"
         },  
         "SubscriptionId" : {
@@ -27,7 +27,7 @@
         },
         "ApplicationPassword" : {
             "Type": "string",
-            "DefaultValue": "example",
+            "DefaultValue": "password",
             "Description": "The Service Principal Application Password, if using"
         },
         "ResourceGroupName":{
@@ -80,11 +80,25 @@
             "DefaultValue" : "password",
             "Description" : "The SQL Server Password"
         },
+        "SingleMsDeployPackageUrl": {
+            "Type": "string",
+            "DefaultValue": "https://my-storage-account.blob.core.windows.net/sitecorearchives/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_single.scwdp.zip",
+            "Description" : "Url to the MS Deploy Package for Sitecore XP if not uploading a new one"
+        },
+        "XcSingleMsDeployPackageUrl": {
+            "Type" : "string",
+            "DefaultValue": "https://my-storage-account.blob.core.windows.net/sitecorearchives/Sitecore%209.0.0%20rev.%20171002%20(Cloud)_xp0xconnect.scwdp.zip",
+            "Description" : "Url to the MS Deploy Package for Sitecore XC if not uploading a new one"
+        },
         "TemplateUri": {
             "Type" : "string",
             "DefaultValue": "https://raw.githubusercontent.com/Sitecore/Sitecore-Azure-Quickstart-Templates/master/Sitecore%209.0.0/XPSingle/azuredeploy.json",
             "Description" : "Url to the ARM template used to deploy"
         }
+    },
+    "Variables" : {
+        "MsDeployPackageUrl" : "[concat('https://', parameter('StorageAccountName'), '.blob.core.windows.net/', parameter('ContainerName'), '/', parameter('SitecoreBlobName'))]",
+        "XCMsDeployPackageUrl" : "[concat('https://', parameter('StorageAccountName'), '.blob.core.windows.net/', parameter('ContainerName'), '/', parameter('XCBlobName'))]"        
     },
     "Modules" : [
         "Install-SitecoreExperienceCloud.psm1"
@@ -108,12 +122,68 @@
                 "TenantId" : "[parameter('TenantId')]"
             }
         },
-        "Remove The Resource Group" : {
-            "Type" : "RemoveResourceGroup",
-            "Description" : "Removes the resource group",
+        "Set New Resource Group" : {
+            "Type" : "SetResourceGroup",
+            "Description" : "Sets the resource group",
             "Params" : {
-                "ResourceGroupName" : "[parameter('ResourceGroupName')]"
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "Location" : "[parameter('Location')]"
             }
-        }       
+        },
+        "Set Sitecore License" : {
+            "Type" : "SetLicenseFile",
+            "Description" : "Gets the Sitecore License and adds to deployment parameters",
+            "Params" : {
+                "FilePath" : "[parameter('LicenseFilePath')]"
+            }
+        },
+        "Set the SSL Certificate" : {
+            "Type" : "SetSslCert",
+            "Description" : "Gets the SSL Certificate and adds to deployment parameters",
+            "Params" : {
+                "FilePath" : "[parameter('SslCertificateFilePath')]",
+                "CertPass" : "[parameter('SslCertificatePassword')]"
+            }
+        },
+        "Set The Deployment ID" : {
+            "Type" : "SetDeploymentId",
+            "Description" : "Sets the Deployment ID and adds to deployment parameters based on the Resource Group Name",
+            "Params" : {
+                "DeploymentId" : "[parameter('DeploymentId')]"
+            }
+        },
+        "Set The Location" : {
+            "Type" : "SetAzureRegion",
+            "Description" : "Sets the Location of the Deployment",
+            "Params" : {
+                "Location" : "[parameter('Location')]"
+            }
+        },
+        "Set The Sitecore Parameters" : {
+            "Type" : "SetSitecoreParams",
+            "Description" : "Sets the Sitecore & SQL Parameters for the deployment",
+            "Params" : {
+                "SitecoreAdminPassword" : "[parameter('SitecoreAdminPassword')]",
+                "SqlUsername" : "[parameter('SqlServerUsername')]",
+                "SqlPassword" : "[parameter('SqlServerPassword')]",
+                "SingleMsDeployPackageUrl" : "[parameter('SingleMsDeployPackageUrl')]",
+                "XcSingleMsDeployPackageUrl" : "[parameter('XcSingleMsDeployPackageUrl')]"
+            }
+        },
+        "Get Confirmation To Proceed" : {
+            "Type" : "GetUserConfirmation",
+            "Description" : "Prompts the user to review and accept the deployment parameters before proceeding",
+            "Params" : {}
+        },
+        "Deploy to Azure" : {
+            "Type" : "NewAzureRmResourceGroupDeployment",
+            "Description" : "Deploy the defined configuration and ARM templates to the Resource Group",
+            "Params" : {
+                "ResourceGroupName" : "[parameter('ResourceGroupName')]",
+                "Location" : "[parameter('Location')]",
+                "DeploymentName" : "[parameter('DeploymentId')]",
+                "TemplateUri" : "[parameter('TemplateUri')]"
+            }
+        }
     }
 }
