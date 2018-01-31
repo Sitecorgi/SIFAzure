@@ -11,12 +11,16 @@ Function Invoke-SetAzureContext {
     )
     
     process{
+
+        Write-Verbose "Setting Azure Context"
         if($UseServicePrincipal){
             Set-AzureRmContext -SubscriptionId $SubscriptionId -TenantId $TenantId
         }
         else{
             Set-AzureRmContext -SubscriptionId $SubscriptionId        
         }
+
+        Write-Information "Azure Context Set"
     }  
 }
 

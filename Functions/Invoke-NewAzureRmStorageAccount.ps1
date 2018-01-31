@@ -22,8 +22,8 @@ Function Invoke-NewAzureRmStorageAccount {
             -Kind Storage `
             -EnableEncryptionService Blob
             
-        
-            Start-Sleep 20
+            Write-Verbose "Sleeping to allow time for Storage Account to finish provisioning"
+            Start-Sleep 10
         }       
     } 
 }

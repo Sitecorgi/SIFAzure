@@ -18,6 +18,8 @@ Function Invoke-SetAzureLogin{
         if($UseServicePrincipal){
             $securePassword = ConvertTo-SecureString $ApplicationPassword -AsPlainText -Force
             $credentials = New-Object System.Management.Automation.PSCredential ($ApplicationId, $securePassword)
+
+            Write-Verbose "Logging in with Service Principal"
             Login-AzureRmAccount -ServicePrincipal -Tenant $TenantId -Credential $credentials
         }
         else{

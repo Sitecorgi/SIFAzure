@@ -14,7 +14,7 @@ Function Invoke-SetAzureRegion {
     
         $global:SitecoreXPAzureParams['location'] = $Location
         
-        Write-Host "Location Set"
+        Write-Output "Location Set"
         $global:SitecoreXPAzureParams
     }  
 }

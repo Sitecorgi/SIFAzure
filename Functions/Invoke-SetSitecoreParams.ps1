@@ -9,24 +9,20 @@ Function Invoke-SetSitecoreParams {
         [parameter(Mandatory=$true)]
         [string]$SqlPassword,
         [parameter(Mandatory=$true)]
-        [string]$SingleMsDeployPackageUrl,
-        [parameter(Mandatory=$true)]
-        [string]$XcSingleMsDeployPackageUrl
+        [string]$RepAuthenticationApiKey
     )
+    
 
     process{
-        if(-not $global:SitecoreXPAzureParams)
-        {
-            $global:SitecoreXPAzureParams = @{}
-        }
-    
+   
+        Write-Verbose "Setting Sitecore deployment parameters"
+        
         $global:SitecoreXPAzureParams['sitecoreAdminPassword'] = $SitecoreAdminPassword
         $global:SitecoreXPAzureParams['sqlServerLogin'] = $SqlUsername
         $global:SitecoreXPAzureParams['sqlServerPassword'] = $SqlPassword
-        $global:SitecoreXPAzureParams['xcSingleMsDeployPackageUrl'] = $XcSingleMsDeployPackageUrl
-        $global:SitecoreXPAzureParams['singleMsDeployPackageUrl'] = $SingleMsDeployPackageUrl
-        Write-Host "Sitecore Parameters Set"
-        $global:SitecoreXPAzureParams
+        $global:SitecoreXPAzureParams['repAuthenticationApiKey'] = $RepAuthenticationApiKey
+
+        Write-Information "Sitecore Parameters Set"
     }
 }
 

@@ -17,12 +17,12 @@ Function Invoke-SetSslCert {
         $CertBlob = [System.Convert]::ToBase64String([System.IO.File]::ReadAllBytes($FilePath))
         
         $global:SitecoreXPAzureParams['authCertificateBlob'] = $CertBlob
-        
+        Write-Verbose "SSL Certificate blob added to deployment object"
+
         $global:SitecoreXPAzureParams['authCertificatePassword'] = $CertPass
-    
-        Write-Host "SSL Certificate Set"
-        $global:SitecoreXPAzureParams
-    
+        Write-Verbose "SSL Certficiate password added to deployment object"
+
+        Write-Output "SSL Certificate Set"
     }
 }
 

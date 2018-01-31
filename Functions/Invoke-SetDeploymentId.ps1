@@ -14,7 +14,7 @@ Function Invoke-SetDeploymentId {
       
         $global:SitecoreXPAzureParams['deploymentId'] = $DeploymentId
         
-        Write-Host "Deployment ID Set"
+        Write-Output "Deployment ID Set"
         $global:SitecoreXPAzureParams
     }  
 }

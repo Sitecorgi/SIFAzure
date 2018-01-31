@@ -16,7 +16,7 @@ Function Invoke-SetLicenseFile {
             $licenseFileBlob = Get-Content -Raw -Encoding UTF8 -Path $FilePath | Out-String
             $global:SitecoreXPAzureParams.Add('licenseXml', $licenseFileBlob) 
         }  
-        Write-Host "License File Set"
+        Write-Output "License File Set"
         $global:SitecoreXPAzureParams
     }
 }

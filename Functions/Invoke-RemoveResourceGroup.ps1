@@ -12,7 +12,11 @@ Function Invoke-RemoveResourceGroup{
                 throw $("Resource Group $($ResourceGroupName) Not found")
             }
 
+            Write-Verbose "Removing Resource Group $ResourceGroupName"
+
             Remove-AzureRmResourceGroup -Name $ResourceGroupName -Force
+
+            Write-Output "Resource Group $ResourceGroupName Removed"
     }      
 }
 

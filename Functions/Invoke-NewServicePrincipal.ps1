@@ -13,8 +13,12 @@ Function Invoke-NewServicePrincipal{
         Login-AzureRmAccount
         $secpassword = ConvertTo-SecureString $Password -AsPlainText -Force
         $servicePrincipal = New-AzureRmADServicePrincipal -DisplayName $ServicePrincipalName -Password $secpassword
-    
+
+        Write-Verbose "Sleeping to allow time for Service Principal to finish provisioning"
+        
         Start-Sleep 20
+
+        Write-Verbose "Assigning contributor role to service principal"
         
         New-AzureRmRoleAssignment -RoleDefinitionName Contributor -ServicePrincipalName $servicePrincipal.ApplicationId
     }  

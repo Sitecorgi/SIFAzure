@@ -16,7 +16,7 @@ Function Invoke-SetResourceGroup {
             New-AzureRmResourceGroup -Name $ResourceGroupName -Location $location
         }
         
-        Write-Host $("Resource Group Set: $($ResourceGroupName)")
+        Write-Output $("Resource Group Set: $($ResourceGroupName)")
     }
 }
 
