@@ -86,13 +86,14 @@
             "Description" : "The SQL Server Password"
         },
         "RepAuthenticationApiKey" : {
-            "Tyoe" : "string",
+            "Type" : "string",
             "DefaultValue" : "67588d50667e47e0a02cb919185f7c30",
             "Description" : "API authentication key for the reporting service server"
         },
         "PackageRoot" : {
             "Type" : "string",
-            "DefaultValue" : "C:\\Sitecore\\Archives\\Azure\\Sitecore 9.0.0 rev. 171002 (WDP XPScaled packages)"
+            "DefaultValue" : "C:\\Sitecore\\Archives\\Azure\\Sitecore 9.0.0 rev. 171002 (WDP XPScaled packages)",
+            "Description" : "The root path to the Web Deploy packages downloaded from Sitecore"
         },
         "CdMsDeployPackage" : {
             "Type" : "string",
